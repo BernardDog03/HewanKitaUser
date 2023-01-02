@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.capstone.hewankita.R
 import com.capstone.hewankita.customview.ButtonValidation
 import com.capstone.hewankita.customview.EditTextValidation
@@ -31,6 +32,7 @@ import com.google.firebase.ktx.Firebase
 class DoctorFragment : Fragment(), View.OnClickListener {
     private var _binding: FragmentMenuBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: DoctorViewModel by viewModels()
 
     private lateinit var btnNext: ButtonValidation
     private lateinit var tvBookingDate: EditTextValidation
@@ -103,8 +105,7 @@ class DoctorFragment : Fragment(), View.OnClickListener {
                     binding.tvBookingTime.text.toString().trim()
                 }"
                 if (outlet.isNotEmpty() && outletId.isNotEmpty() && outletEmail.isNotEmpty() && bookingTime.isNotEmpty() && bookingDate.isNotEmpty()) {
-                    addService(outlet, bookingDate, bookingTime, outletId, outletEmail)
-
+                    viewModel.addDoctorService(outlet,bookingDate, bookingTime, outletId, outletEmail)
                     Toast.makeText(
                         requireActivity(),
                         resources.getString(R.string.booking_success),
@@ -176,28 +177,6 @@ class DoctorFragment : Fragment(), View.OnClickListener {
 
             timePicker.show()
         }
-    }
-
-    private fun addService(outlet: String, bookingDate: String, bookingTime: String, outletEmail: String, outletId: String) {
-        val user: FirebaseUser? = auth.currentUser
-        val userEmail: String? = user!!.email
-
-        val database = Firebase.database
-        val databaseReference = database.getReference(Constants.TABLE_DATA_SERVICE)
-            .child(Constants.CHILD_SERVICE_DOCTOR_SERVICE)
-        val key: String = databaseReference.push().key.toString()
-
-        val hashMap = mapOf<String, Any>(
-            Constants.CONST_SERVICE_OUTLET to outlet,
-            Constants.CONST_SERVICE_DATE to bookingDate,
-            Constants.CONST_SERVICE_TIME to bookingTime,
-            Constants.CONST_USER_EMAIL to userEmail.toString(),
-            Constants.CONST_KEY to key,
-            Constants.CONST_SERVICE_OUTLET_ID to outletId,
-            Constants.CONST_SERVICE_OUTLET_EMAIL to outletEmail
-        )
-
-        databaseReference.push().setValue(hashMap)
     }
 
     private fun getDataOutlet(){

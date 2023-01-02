@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.capstone.hewankita.R
 import com.capstone.hewankita.customview.ButtonValidation
 import com.capstone.hewankita.customview.EditTextValidation
@@ -31,6 +32,7 @@ import com.google.firebase.ktx.Firebase
 class GroomingFragment : Fragment(), View.OnClickListener {
     private var _binding: FragmentMenuBinding? = null
     private val binding get() = _binding!!
+    private val viewModel : GroomingViewModel by viewModels()
 
     private lateinit var btnNext: ButtonValidation
     private lateinit var tvBookingDate: EditTextValidation
@@ -103,8 +105,8 @@ class GroomingFragment : Fragment(), View.OnClickListener {
                     binding.tvBookingTime.text.toString().trim()
                 }"
                 if (outlet.isNotEmpty() && outletId.isNotEmpty() && outletEmail.isNotEmpty() && bookingTime.isNotEmpty() && bookingDate.isNotEmpty()) {
-                    addService(outlet, bookingDate, bookingTime, outletId, outletEmail)
 
+                    viewModel.addGroomingService(outlet, bookingDate, bookingTime, outletEmail, outletId)
                     Toast.makeText(
                         requireActivity(),
                         resources.getString(R.string.booking_success),

@@ -2,10 +2,13 @@ package com.capstone.hewankita.ui.bottom.ui.profile
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Message
 import android.provider.Settings
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.capstone.hewankita.R
 import com.capstone.hewankita.databinding.FragmentProfileBinding
@@ -13,19 +16,21 @@ import com.capstone.hewankita.ui.check_schedule.CheckSchedule
 import com.capstone.hewankita.ui.editProfile.EditProfileActivity
 import com.capstone.hewankita.ui.information.InformationActivity
 import com.capstone.hewankita.ui.login.LoginActivity
-import com.capstone.hewankita.ui.myPet.MyPetActivity
 import com.capstone.hewankita.ui.myPet.PetActivity
 import com.capstone.hewankita.utils.Constants
+import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
+import java.io.IOException
 
 class ProfileFragment : Fragment(), View.OnClickListener {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: ProfileViewModel by viewModels()
 
     private lateinit var auth: FirebaseAuth
 
@@ -53,38 +58,38 @@ class ProfileFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onClick(v: View) {
-        if(v == binding.column1) {
+        if (v == binding.column1) {
             val intent = Intent(requireActivity(), PetActivity::class.java)
             startActivity(intent)
         }
-        if(v == binding.column2) {
+        if (v == binding.column2) {
             val intent = Intent(requireActivity(), CheckSchedule::class.java)
             startActivity(intent)
         }
-        if(v == binding.column3) {
+        if (v == binding.column3) {
             val intent = Intent(requireActivity(), EditProfileActivity::class.java)
             startActivity(intent)
         }
-        if(v == binding.column4) {
+        if (v == binding.column4) {
             val intent = Intent(requireActivity(), InformationActivity::class.java)
             startActivity(intent)
         }
-        if(v == binding.column5) {
-            logOut()
+        if (v == binding.column5) {
+            viewModel.signOut()
             val intent = Intent(requireActivity(), LoginActivity::class.java)
             startActivity(intent)
-            Toast.makeText(requireActivity(), resources.getString(R.string.logout_success), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireActivity(),
+                resources.getString(R.string.logout_success),
+                Toast.LENGTH_SHORT
+            ).show()
             activity?.finish()
         }
-    }
-    private fun logOut(){
-        Firebase.auth.signOut()
     }
 
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.option_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
     }
 
     @Deprecated("Deprecated in Java")
@@ -95,10 +100,14 @@ class ProfileFragment : Fragment(), View.OnClickListener {
                 true
             }
             R.id.logout -> {
-                logOut()
+                viewModel.signOut()
                 val intent = Intent(requireActivity(), LoginActivity::class.java)
                 startActivity(intent)
-                Toast.makeText(requireActivity(), resources.getString(R.string.logout_success), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireActivity(),
+                    resources.getString(R.string.logout_success),
+                    Toast.LENGTH_SHORT
+                ).show()
                 activity?.finish()
                 true
             }
@@ -107,17 +116,17 @@ class ProfileFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
     }
 
-    private fun getUserData(){
+    private fun getUserData() {
         val user: FirebaseUser? = auth.currentUser
         val userID: String = user!!.uid
-        val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().getReference(Constants.TABLE_DATA_USER)
+        val databaseReference: DatabaseReference =
+            FirebaseDatabase.getInstance().getReference(Constants.TABLE_DATA_USER)
 
-        databaseReference.child(userID).get().addOnSuccessListener{
-            if (it.exists()){
+        databaseReference.child(userID).get().addOnSuccessListener {
+            if (it.exists()) {
                 val usernameProfile = it.child(Constants.CONST_USER_USERNAME).value
                 val emailProfile = it.child(Constants.CONST_USER_EMAIL).value
                 val photoProfile = it.child(Constants.CONST_USER_IMG).value
@@ -127,9 +136,8 @@ class ProfileFragment : Fragment(), View.OnClickListener {
                 Glide.with(this)
                     .load(photoProfile)
                     .into(binding.imageViewProfile)
-            }
-            else{
-                Toast.makeText(requireActivity(), "Error", Toast.LENGTH_SHORT).show()
+            }else {
+                toastMsg("e")
             }
         }
     }
@@ -137,5 +145,9 @@ class ProfileFragment : Fragment(), View.OnClickListener {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun toastMsg(message: String) {
+        Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
     }
 }

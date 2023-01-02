@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.capstone.hewankita.R
 import com.capstone.hewankita.customview.ButtonValidation
 import com.capstone.hewankita.customview.EditTextValidation
@@ -31,6 +32,7 @@ import com.google.firebase.ktx.Firebase
 class CareFragment : Fragment(), View.OnClickListener {
     private var _binding: FragmentCareBinding? = null
     private val binding get() = _binding!!
+    private val viewModel : CareViewModel by viewModels()
 
     private lateinit var btnNext: ButtonValidation
     private lateinit var tvCheckIn: EditTextValidation
@@ -118,9 +120,9 @@ class CareFragment : Fragment(), View.OnClickListener {
                 val timeOfArrival = "${getString(R.string.timeOfArrival)}:  ${
                     binding.tvTimeOfArrival.text.toString().trim()
                 }"
-                addService(outlet, checkIn, checkOut, timeOfArrival, outletId, outletEmail)
 
                 if (outlet.isNotEmpty() && outletEmail.isNotEmpty() && outlet.isNotEmpty() && checkIn.isNotEmpty() && checkOut.isNotEmpty() && timeOfArrival.isNotEmpty()) {
+                    viewModel.addCareService(outlet, checkIn, checkOut, timeOfArrival, outletEmail, outletId)
                     Toast.makeText(
                         requireActivity(),
                         resources.getString(R.string.booking_success),
@@ -211,36 +213,6 @@ class CareFragment : Fragment(), View.OnClickListener {
 
             timePicker.show()
         }
-    }
-
-    private fun addService(
-        outlet: String,
-        checkIn: String,
-        checkOut: String,
-        timeOA: String,
-        outletEmail: String,
-        outletId: String
-    ) {
-        val user: FirebaseUser? = auth.currentUser
-        val userEmail: String? = user!!.email
-
-        val database = Firebase.database
-        val databaseReference = database.getReference(Constants.TABLE_DATA_SERVICE)
-            .child(Constants.CHILD_SERVICE_CARE_SERVICE)
-        val key: String = databaseReference.push().key.toString()
-
-        val hashMap = mapOf<String, Any>(
-            Constants.CONST_SERVICE_OUTLET to outlet,
-            Constants.CONST_SERVICE_CHECK_IN to checkIn,
-            Constants.CONST_SERVICE_CHECK_OUT to checkOut,
-            Constants.CONST_SERVICE_TIME_OA to timeOA,
-            Constants.CONST_USER_EMAIL to userEmail.toString(),
-            Constants.CONST_KEY to key,
-            Constants.CONST_SERVICE_OUTLET_ID to outletId,
-            Constants.CONST_SERVICE_OUTLET_EMAIL to outletEmail
-        )
-
-        databaseReference.push().setValue(hashMap)
     }
 
     private fun getDataOutlet() {

@@ -6,6 +6,7 @@ import android.provider.Settings
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.capstone.hewankita.R
@@ -25,6 +26,7 @@ class TipsFragment : Fragment() {
     private var _binding: FragmentTipsBinding? = null
     private val binding get() = _binding!!
     private val tipsList = ArrayList<AllData>()
+    private val viewModel: TipsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,11 +46,13 @@ class TipsFragment : Fragment() {
         return binding.root
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.option_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.localization -> {
@@ -56,7 +60,7 @@ class TipsFragment : Fragment() {
                 true
             }
             R.id.logout -> {
-                logOut()
+                viewModel.signOut()
                 val intent = Intent(requireActivity(), LoginActivity::class.java)
                 startActivity(intent)
                 Toast.makeText(requireActivity(), resources.getString(R.string.logout_success), Toast.LENGTH_SHORT).show()
@@ -72,10 +76,6 @@ class TipsFragment : Fragment() {
         super.onCreate(savedInstanceState)
     }
 
-    private fun logOut(){
-        Firebase.auth.signOut()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -87,7 +87,7 @@ class TipsFragment : Fragment() {
         databaseReference.child(Constants.TABLE_DATA_TIPS).addValueEventListener(object :
             ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
-                showSnackbarMessage(getString(R.string.no_data))
+                showSnackBarMessage(getString(R.string.no_data))
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -100,13 +100,13 @@ class TipsFragment : Fragment() {
                     binding.rvTips.adapter = ListTipsAdapter(tipsList)
                 }
                 else{
-                    showSnackbarMessage(getString(R.string.no_data))
+                    showSnackBarMessage(getString(R.string.no_data))
                 }
             }
         })
     }
 
-    private fun showSnackbarMessage(message: String) {
+    private fun showSnackBarMessage(message: String) {
         Snackbar.make(binding.rvTips, message, Snackbar.LENGTH_SHORT).show()
     }
 }

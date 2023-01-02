@@ -6,6 +6,7 @@ import android.provider.Settings
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.capstone.hewankita.R
 import com.capstone.hewankita.databinding.FragmentHomeBinding
 import com.capstone.hewankita.ui.care.CareList
@@ -13,13 +14,11 @@ import com.capstone.hewankita.ui.doctor.DoctorList
 import com.capstone.hewankita.ui.grooming.GroomingList
 import com.capstone.hewankita.ui.login.LoginActivity
 import com.capstone.hewankita.ui.vaccination.VaccinationList
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-
 
 class HomeFragment : Fragment(), View.OnClickListener {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: HomeViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +48,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
         if(v == binding.ivCare) {
             val intent = Intent(requireActivity(), CareList::class.java)
+
             startActivity(intent)
         }
         if(v == binding.ivVaccination) {
@@ -76,7 +76,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 true
             }
             R.id.logout -> {
-                logOut()
+                viewModel.signOut()
                 val intent = Intent(requireActivity(), LoginActivity::class.java)
                 startActivity(intent)
                 Toast.makeText(requireActivity(), resources.getString(R.string.logout_success), Toast.LENGTH_SHORT).show()
@@ -85,10 +85,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
             }
             else -> false
         }
-    }
-
-    private fun logOut(){
-        Firebase.auth.signOut()
     }
 
     override fun onDestroyView() {
